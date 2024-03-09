@@ -1,0 +1,12 @@
+# MAX_OVERTIME_MINS prevents accidentally sending really old scheduled texts.
+# should be set approximately to how often you run this script.
+MAX_OVERTIME_MINS=30
+
+# Prints texts to terminal instead of sending them through iMessage
+DEBUG_TEXTING=False
+
+# Where to look for scheduled texts
+SCHEDULED_TEXTS_DIRECTORY=./example_scheduled_texts
+
+# Add more contacts here
+myself=15551234567
