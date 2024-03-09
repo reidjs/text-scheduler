@@ -8,5 +8,5 @@ DEBUG_TEXTING=False
 # Where to look for scheduled texts
 SCHEDULED_TEXTS_DIRECTORY=./example_scheduled_texts
 
-# Add more contacts here
 myself=15551234567
+# Add more contacts here

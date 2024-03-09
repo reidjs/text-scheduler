@@ -1,5 +1,5 @@
 # schedule-texts-from-txt
-Schedule iMessage texts from `.txt` files on your computer.
+Schedule iMessage texts from `.txt` files from your Mac.
 
 ![a cute smiling mailbox](./mailbox.png)
 
