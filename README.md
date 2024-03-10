@@ -17,7 +17,7 @@ Schedule iMessage or SMS texts from `.txt` files from your Mac.
 # How it works
 The script parses files in the `scheduled_messages` directory that follow this filename format: `Text {person} {datetime}.txt`. You can change this directory in the SETTINGS.txt file. 
 1. The first word in the filename must be `Text`.
-2. The second word, `{person}` must be the persons identifier. This is set in SETTINGS.txt, e.g., `bob=1234567890` would set `bob`'s phone number to `1234567890`
+2. The second word, `{person}` must be the persons identifier. This is set in SETTINGS.txt, e.g., `bob=1234567890` would set `bob`'s phone number to `1234567890`. If `{person}` starts with `sms_` like `sms_bob`, then the text will send via SMS. 
 3. Everything following the name, before the .txt, is considered the `{datetime}`. Many formats may work, but this is the only one I have tested: `Month D, YYYY HH:MM(AM|PM)`, for example `March 9, 2024 7:25AM`. You can also use the keyword `now` or `asap` as a `datetime` to send texts immediately.
 4. After a message is sent, it will move the message to the `sent` folder in your `scheduled_texts` directory. 
 
