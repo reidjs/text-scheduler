@@ -1,8 +1,8 @@
-import logging
 import os
 import glob
 import subprocess
 from datetime import datetime
+from dateutil import parser
 import shutil
 import re
 from dotenv import dotenv_values
@@ -19,35 +19,14 @@ SCHEDULED_TEXTS_DIRECTORY = env_vars["SCHEDULED_TEXTS_DIRECTORY"]
 
 # get only files starting with 'text' and ending in .txt or .md in the notes directory
 TEXT_FILENAME_PATTERN = re.compile(r"^text.*\.(txt|md)$", re.IGNORECASE)
-SEND_MESSAGE_SCRIPT_PATH = "./send_message.applescript"
-
-# LOG_LEVEL = logging.INFO
-LOG_LEVEL = logging.DEBUG
-logger = logging.getLogger("parser_logger")
-logger.setLevel(LOG_LEVEL)
-ch = logging.StreamHandler()
-ch.setLevel(LOG_LEVEL)
-logger.addHandler(ch)
+SEND_IMESSAGE_SCRIPT_PATH = "./send_imessage.applescript"
+SEND_SMS_SCRIPT_PATH = "./send_sms.applescript"
 
 
 def parse_human_datetime(human_datetime):
-    try:
-        parsed_datetime = datetime.strptime(human_datetime, "%B %d, %Y %I:%M%p")
-    except ValueError:
-        try:
-            parsed_datetime = datetime.strptime(human_datetime, "%B %d, %Y %I:%M %p")
-        except ValueError:
-            try:
-                parsed_datetime = datetime.strptime(human_datetime, "%B %d %Y %I:%M%p")
-            except ValueError:
-                try:
-                    parsed_datetime = datetime.strptime(
-                        human_datetime, "%B %d %Y %I:%M %p"
-                    )
-                except ValueError:
-                    raise ValueError("Unrecognized datetime format")
-
-    return parsed_datetime
+    if human_datetime == "now" or human_datetime == "asap":
+        return datetime.now()
+    return parser.parse(human_datetime)
 
 
 def get_date_from_filename(filename):
@@ -61,8 +40,6 @@ def get_date_from_filename(filename):
 
 def parse_datetime_from_filename(filename):
     human_datetime = get_date_from_filename(filename).lower()
-    if human_datetime == "now" or human_datetime == "asap":
-        return datetime.now()
 
     t = parse_human_datetime(human_datetime)
 
@@ -89,8 +66,7 @@ def parse_recipient_from_filename(filename):
     return filename.split()[1].lower()
 
 
-def get_recipient_number_from_filename(filename):
-    contact_name = parse_recipient_from_filename(filename)
+def get_recipient_number_from_filename(contact_name):
     try:
         return env_vars[contact_name].lower()
     except KeyError:
@@ -99,20 +75,35 @@ def get_recipient_number_from_filename(filename):
         )
 
 
+def is_sms_recipient(recipient):
+    return recipient.split("_")[0] == "sms"
+
+
 def send_message(file):
-    recipient = get_recipient_number_from_filename(file.name)
+    contact_name = parse_recipient_from_filename(file.name)
+    recipient = get_recipient_number_from_filename(contact_name)
     message = file.read()
     if DEBUG_TEXTING:
         print(f"DEBUG TEXTING MODE: Would send {recipient}: {message}")
         move_file_to_sent_directory(file.name)
         return
-    try:
-        subprocess.run(
-            ["osascript", SEND_MESSAGE_SCRIPT_PATH, recipient, message], check=True
-        )
-        move_file_to_sent_directory(file.name)
-    except subprocess.CalledProcessError as e:
-        print("error sending text:", e)
+
+    if is_sms_recipient(contact_name):
+        try:
+            subprocess.run(
+                ["osascript", SEND_SMS_SCRIPT_PATH, recipient, message], check=True
+            )
+            move_file_to_sent_directory(file.name)
+        except subprocess.CalledProcessError as e:
+            print("error sending SMS:", e)
+    else:
+        try:
+            subprocess.run(
+                ["osascript", SEND_IMESSAGE_SCRIPT_PATH, recipient, message], check=True
+            )
+            move_file_to_sent_directory(file.name)
+        except subprocess.CalledProcessError as e:
+            print("error sending iMessage:", e)
 
 
 def send_messages(directory):
@@ -126,4 +117,5 @@ def send_messages(directory):
     return files
 
 
-send_messages(SCHEDULED_TEXTS_DIRECTORY)
+if __name__ == "__main__":
+    send_messages(SCHEDULED_TEXTS_DIRECTORY)
