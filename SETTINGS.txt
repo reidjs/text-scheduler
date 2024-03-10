@@ -8,6 +8,6 @@ DEBUG_TEXTING=False
 # Where to look for scheduled texts
 SCHEDULED_TEXTS_DIRECTORY=./example_scheduled_texts
 
-myself=15102078558
-sms_myself=16572292278
+myself=155512345678
+sms_myself=155512345678
 # Add more contacts here
