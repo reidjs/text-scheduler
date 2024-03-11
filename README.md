@@ -24,6 +24,32 @@ The script parses files in the `scheduled_messages` directory that follow this f
 
 **Will only send texts with `{datetime}` less than MAX_OVERTIME_MINS, 30 minutes by default. This is to prevent accidentally sending really old messages. For example, if you had this script running on a cron that failed then restarted a week later, you probably don't want those week-old messages to send.*
 
+# GUI
+A GUI is provided if you are willing to add another dependency via
+```
+pip install PyQt5
+```
+This allows you to interface a little more easily. Although non-obvious, the timing boxes at the bottom of the GUI are **scrollable**. 
+Although not as visually appealing as the iPhone alarm/countdown timer scheduler, it works roughly the same.
+If you wish to send now, simply don't change the time...it always defaults to the current time.
+On top of this, adding/changing numbers can also be driven through the GUI. Examples below.
+
+You can easily add new contacts with form `contact=number` as shown below.
+
+![Adding a new contact](gui_pngs/new_person.png)
+
+You can also change someone's number with the same syntax. Note that this will be automatically overwritten. If you wish for this to throw an error instead, change the `overwrite` default behavior in `gui.py`.
+
+![Changing someone's number](gui_pngs/old_friend.png)
+
+Below is a summary of the side effects. The second screenshot is there to simply show that the GUI ONLY writes text files; it does not run the `send_scheduled_message.py` script.
+
+![What the updated SETTINGS.txt file will look like](gui_pngs/gui_side_effect.png)
+
+![GUI only writes files, does not send them](gui_pngs/gui_doesnt_send_messages.png)
+
+If you wish to have both where the GUI can flip a flag where you might want to send messages, then I would suggest adding the function outlined in `bash_shortcut.sh` to your `bashrc` (or whatever shell you use) file. `stxt` will not send messages, and `stxt 1` will go ahead and send all queued messages.
+
 # Help & Feedback
 Please create a GitHub issue if you have feedback or need help. Thanks! 
 
