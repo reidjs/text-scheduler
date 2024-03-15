@@ -1,5 +1,5 @@
 # schedule-texts-from-txt
-Schedule iMessage, SMS, or WhatsApp messages from `.txt` files from your Mac.
+Schedule iMessage, SMS, and WhatsApp messages from `.txt` files from your Mac.
 
 ![a cute smiling mailbox](./mailbox.png)
 
@@ -11,7 +11,7 @@ Schedule iMessage, SMS, or WhatsApp messages from `.txt` files from your Mac.
    2. `source activate.sh` 
    3. `pip install -r requirements.txt`
    4. `python send_scheduled_messages.py`
-4. 💬 If everything went well, you should receive an iMessage text that says "Hello from iMessage!", and an SMS text that says "Hello from SMS!"
+4. 💬 If everything went well, you should receive an iMessage text that says "Hello from iMessage!", an SMS text that says "Hello from SMS!", and a WhatsApp message that says "Hello from WhatsApp".
 
 
 # How it works
