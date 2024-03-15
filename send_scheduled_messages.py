@@ -5,6 +5,7 @@ from datetime import datetime
 from dateutil import parser
 import shutil
 import re
+import pywhatkit
 from dotenv import dotenv_values
 
 DOTENV_SETTINGS_PATH = "./SETTINGS.txt"
@@ -17,8 +18,10 @@ DEBUG_TEXTING = env_vars["DEBUG_TEXTING"] == "True"
 
 SCHEDULED_TEXTS_DIRECTORY = env_vars["SCHEDULED_TEXTS_DIRECTORY"]
 
-# get only files starting with 'text' and ending in .txt or .md in the notes directory
-TEXT_FILENAME_PATTERN = re.compile(r"^text.*\.(txt|md)$", re.IGNORECASE)
+# get only files starting with 'message, 'sms' or 'whatsapp', ending in .txt or .md in the notes directory
+TEXT_FILENAME_PATTERN = re.compile(
+    r"^(message|sms|whatsapp).*\.(txt|md)$", re.IGNORECASE
+)
 SEND_IMESSAGE_SCRIPT_PATH = "./send_imessage.applescript"
 SEND_SMS_SCRIPT_PATH = "./send_sms.applescript"
 
@@ -62,11 +65,11 @@ def move_file_to_sent_directory(file_path):
     shutil.move(file_path, dest_dir)
 
 
-def parse_recipient_from_filename(filename):
-    return filename.split()[1].lower()
+def parse_recipient_from_basename(basename):
+    return basename.split()[1].lower()
 
 
-def get_recipient_number_from_filename(contact_name):
+def get_recipient_number_from_contact_name(contact_name):
     try:
         return env_vars[contact_name].lower()
     except KeyError:
@@ -75,20 +78,40 @@ def get_recipient_number_from_filename(contact_name):
         )
 
 
-def is_sms_recipient(recipient):
-    return recipient.split("_")[0] == "sms"
+def is_sms(filename):
+    return filename.split()[0].lower() == "sms"
 
 
-def send_message(file):
-    contact_name = parse_recipient_from_filename(file.name)
-    recipient = get_recipient_number_from_filename(contact_name)
+def is_whatsapp(filename):
+    return filename.split()[0].lower() == "whatsapp"
+
+
+def send_whatsapp(phone_number, message):
+    pywhatkit.sendwhatmsg_instantly(f"+{phone_number}", message, 5, True, 0)
+
+
+def send_message(file, filename):
+    # filename in this case must be the 'basename', "/path/to/file/filename is this.txt"
+    # file.name provides the full path, including the filename
+
+    contact_name = parse_recipient_from_basename(filename)
+    recipient = get_recipient_number_from_contact_name(contact_name)
     message = file.read()
+    medium = "iMessage"
+    if is_whatsapp(filename):
+        medium = "WhatsApp"
+    elif is_sms(filename):
+        medium = "SMS"
+
     if DEBUG_TEXTING:
-        print(f"DEBUG TEXTING MODE: Would send {recipient}: {message}")
+        print(f"DEBUG TEXTING MODE: Would send {recipient}: {message} via {medium}")
         move_file_to_sent_directory(file.name)
         return
 
-    if is_sms_recipient(contact_name):
+    if medium == "WhatsApp":
+        send_whatsapp(recipient, message)
+        move_file_to_sent_directory(file.name)
+    elif medium == "SMS":
         try:
             subprocess.run(
                 ["osascript", SEND_SMS_SCRIPT_PATH, recipient, message], check=True
@@ -112,7 +135,7 @@ def send_messages(directory):
         filename = os.path.basename(file_path)
         if TEXT_FILENAME_PATTERN.match(filename) and file_ready_to_be_sent(filename):
             with open(file_path, "r", encoding="utf-8") as file:
-                send_message(file)
+                send_message(file, filename)
 
     return files
 

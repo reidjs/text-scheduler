@@ -9,5 +9,4 @@ DEBUG_TEXTING=False
 SCHEDULED_TEXTS_DIRECTORY=./example_scheduled_texts
 
 myself=155512345678
-sms_myself=155512345678
 # Add more contacts here

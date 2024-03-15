@@ -49,9 +49,17 @@ class CustomDateTimePicker(QWidget):
     def initUI(self):
         mainLayout = QVBoxLayout(self)
 
+        headerLayout = QHBoxLayout()
+
+        mediums = ["Message", "SMS", "WhatsApp"]
+        self.mediumBox = ScrollableComboBox(mediums, self)
+        headerLayout.addWidget(self.mediumBox)
+
         self.recipientEntry = QLineEdit(self)
         self.recipientEntry.setPlaceholderText("Recipient Name")
-        mainLayout.addWidget(self.recipientEntry)
+        headerLayout.addWidget(self.recipientEntry)
+
+        mainLayout.addLayout(headerLayout)
 
         # Message text input
         self.messageText = QTextEdit(self)
@@ -95,7 +103,7 @@ class CustomDateTimePicker(QWidget):
 
         mainLayout.addLayout(pickerLayout)
         self.setLayout(mainLayout)
-        self.setWindowTitle('Schedule Message')
+        self.setWindowTitle("Schedule Message")
 
         self.scheduleButton = QPushButton("Schedule", self)
         self.scheduleButton.clicked.connect(self.createScheduleFile)
@@ -109,32 +117,30 @@ class CustomDateTimePicker(QWidget):
         hour = self.hourBox.currentText()
         minute = self.minuteBox.currentText()
         ampm = self.ampmBox.currentText()
+        medium = self.mediumBox.currentText()
 
-        s = open('SETTINGS.txt', 'r').read()
-        lines = s.split('\n')
+        s = open("SETTINGS.txt", "r").read()
+        lines = s.split("\n")
         lines_filtered = [
-            e.strip()
-            for e in lines
-            if e != '' and not e.strip().startswith('#')
+            e.strip() for e in lines if e != "" and not e.strip().startswith("#")
         ]
         print(lines_filtered)
-        d = {e.split('=')[0]: e.split('=')[1] for e in lines_filtered}
-        root = os.path.abspath(d['SCHEDULED_TEXTS_DIRECTORY'])
+        d = {e.split("=")[0]: e.split("=")[1] for e in lines_filtered}
+        root = os.path.abspath(d["SCHEDULED_TEXTS_DIRECTORY"])
 
         # Constructing filename
-        if '=' in recipientName:
-            true_recipient = recipientName.split('=')[0]
+        if "=" in recipientName:
+            true_recipient = recipientName.split("=")[0]
         else:
             true_recipient = recipientName
-        fileName = (
-            f"Text {true_recipient} {month} {day}, {hour}:{minute}{ampm}.txt"
-        )
+
+        fileName = f"{medium} {true_recipient} {month} {day}, {hour}:{minute}{ampm}.txt"
         fileName = os.path.join(root, fileName)
 
         settingsEdited = False
-        if '=' in recipientName:
-            name = recipientName.split('=')[0]
-            number = recipientName.split('=')[1]
+        if "=" in recipientName:
+            name = recipientName.split("=")[0]
+            number = recipientName.split("=")[1]
             if name in d.keys():
                 if d[name] != number:
                     if self.overwrite:
@@ -148,18 +154,18 @@ class CustomDateTimePicker(QWidget):
                 d[name] = number
                 settingsEdited = True
             if settingsEdited:
-                print(f'Adding {name}={number} to SETTINGS.txt')
-                with open('SETTINGS.txt', 'w') as file:
-                    file.write('\n'.join([f"{k}={v}" for k, v in d.items()]))
+                print(f"Adding {name}={number} to SETTINGS.txt")
+                with open("SETTINGS.txt", "w") as file:
+                    file.write("\n".join([f"{k}={v}" for k, v in d.items()]))
 
         # Writing the message to the file
-        with open(fileName, 'w') as file:
+        with open(fileName, "w") as file:
             file.write(message)
 
         self.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     picker = CustomDateTimePicker()
     picker.show()

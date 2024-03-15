@@ -1,1 +1,5 @@
+PyQt5==5.15.10
+PyQt5_sip==12.13.0
 python-dotenv==1.0.1
+python_dateutil==2.9.0.post0
+pywhatkit==5.4
