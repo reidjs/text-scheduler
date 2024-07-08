@@ -1,4 +1,4 @@
-# schedule-texts-from-txt
+# Text Scheduler
 Schedule iMessage, SMS, and WhatsApp messages from `.txt` files from your Mac.
 
 ![a cute smiling mailbox](./mailbox.png)
